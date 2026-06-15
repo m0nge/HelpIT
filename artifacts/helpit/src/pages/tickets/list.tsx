@@ -1,116 +1,111 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { useAuth } from "@/lib/auth";
-import { useGetTickets, Ticket, TicketStatus, TicketPriority, TicketCategory } from "@workspace/api-client-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useGetTickets } from "@workspace/api-client-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Plus, Search, FilterX } from "lucide-react";
+import { Loader2, Plus, FilterX, UserCheck } from "lucide-react";
 import { Table as UITable, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
+const STATUS_BADGES: Record<string, React.ReactNode> = {
+  open: <Badge variant="outline" className="text-blue-500 border-blue-500/20">Abierto</Badge>,
+  in_progress: <Badge variant="outline" className="text-amber-500 border-amber-500/20">En Progreso</Badge>,
+  resolved: <Badge variant="outline" className="text-green-500 border-green-500/20">Resuelto</Badge>,
+  closed: <Badge variant="outline" className="text-gray-500 border-gray-500/20">Cerrado</Badge>,
+};
+
+const PRIORITY_BADGES: Record<string, React.ReactNode> = {
+  low: <Badge variant="secondary" className="bg-gray-500/10 text-gray-500">Baja</Badge>,
+  medium: <Badge variant="secondary" className="bg-blue-500/10 text-blue-500">Media</Badge>,
+  high: <Badge variant="secondary" className="bg-orange-500/10 text-orange-500">Alta</Badge>,
+  critical: <Badge variant="destructive">Crítica</Badge>,
+};
+
+const CATEGORY_LABELS: Record<string, string> = {
+  hardware: "Hardware", software: "Software", network: "Red", access: "Acceso",
+};
 
 export default function TicketsList() {
   const { user } = useAuth();
   const isTech = user?.role === "technician" || user?.role === "admin";
-  
-  const [status, setStatus] = useState<string>("all");
-  const [priority, setPriority] = useState<string>("all");
-  const [category, setCategory] = useState<string>("all");
-  
+
+  const [status, setStatus] = useState("all");
+  const [priority, setPriority] = useState("all");
+  const [category, setCategory] = useState("all");
+
   const queryParams: any = {};
   if (status !== "all") queryParams.status = status;
   if (priority !== "all") queryParams.priority = priority;
   if (category !== "all") queryParams.category = category;
-  if (!isTech) queryParams.assignedTo = user?.id; // If not tech, we only fetch their tickets? Actually the API should handle this, but let's be safe. The prompt says "user: shows their own tickets list" on dashboard. On /tickets, maybe also only their own.
-  
+
   const { data: tickets, isLoading } = useGetTickets(queryParams);
 
-  const getPriorityBadge = (p: string) => {
-    switch (p) {
-      case 'low': return <Badge variant="secondary" className="bg-gray-500/10 text-gray-500">Low</Badge>;
-      case 'medium': return <Badge variant="secondary" className="bg-blue-500/10 text-blue-500">Medium</Badge>;
-      case 'high': return <Badge variant="secondary" className="bg-orange-500/10 text-orange-500">High</Badge>;
-      case 'critical': return <Badge variant="destructive" className="animate-pulse-fast">Critical</Badge>;
-      default: return null;
-    }
-  };
-
-  const getStatusBadge = (s: string) => {
-    switch (s) {
-      case 'open': return <Badge variant="outline" className="text-blue-500 border-blue-500/20">Open</Badge>;
-      case 'in_progress': return <Badge variant="outline" className="text-amber-500 border-amber-500/20">In Progress</Badge>;
-      case 'resolved': return <Badge variant="outline" className="text-green-500 border-green-500/20">Resolved</Badge>;
-      case 'closed': return <Badge variant="outline" className="text-gray-500 border-gray-500/20">Closed</Badge>;
-      default: return null;
-    }
-  };
+  const hasFilters = status !== "all" || priority !== "all" || category !== "all";
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Tickets</h1>
-          <p className="text-muted-foreground">Manage and track support requests.</p>
+          <p className="text-muted-foreground">Gestiona y da seguimiento a las solicitudes de soporte.</p>
         </div>
         <Link href="/tickets/new">
           <Button className="gap-2">
             <Plus className="h-4 w-4" />
-            Create Ticket
+            Crear Ticket
           </Button>
         </Link>
       </div>
 
       <Card>
         <CardHeader className="pb-4">
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-            <div className="flex flex-1 gap-4 flex-wrap">
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="open">Open</SelectItem>
-                  <SelectItem value="in_progress">In Progress</SelectItem>
-                  <SelectItem value="resolved">Resolved</SelectItem>
-                  <SelectItem value="closed">Closed</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Select value={priority} onValueChange={setPriority}>
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Priority" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Priorities</SelectItem>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                  <SelectItem value="critical">Critical</SelectItem>
-                </SelectContent>
-              </Select>
+          <div className="flex flex-wrap gap-3 items-center">
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Estado" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los estados</SelectItem>
+                <SelectItem value="open">Abierto</SelectItem>
+                <SelectItem value="in_progress">En Progreso</SelectItem>
+                <SelectItem value="resolved">Resuelto</SelectItem>
+                <SelectItem value="closed">Cerrado</SelectItem>
+              </SelectContent>
+            </Select>
 
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="hardware">Hardware</SelectItem>
-                  <SelectItem value="software">Software</SelectItem>
-                  <SelectItem value="network">Network</SelectItem>
-                  <SelectItem value="access">Access</SelectItem>
-                </SelectContent>
-              </Select>
+            <Select value={priority} onValueChange={setPriority}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Prioridad" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas las prioridades</SelectItem>
+                <SelectItem value="low">Baja</SelectItem>
+                <SelectItem value="medium">Media</SelectItem>
+                <SelectItem value="high">Alta</SelectItem>
+                <SelectItem value="critical">Crítica</SelectItem>
+              </SelectContent>
+            </Select>
 
-              {(status !== 'all' || priority !== 'all' || category !== 'all') && (
-                <Button variant="ghost" size="icon" onClick={() => { setStatus('all'); setPriority('all'); setCategory('all'); }}>
-                  <FilterX className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Categoría" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas las categorías</SelectItem>
+                <SelectItem value="hardware">Hardware</SelectItem>
+                <SelectItem value="software">Software</SelectItem>
+                <SelectItem value="network">Red</SelectItem>
+                <SelectItem value="access">Acceso</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {hasFilters && (
+              <Button variant="ghost" size="icon" onClick={() => { setStatus("all"); setPriority("all"); setCategory("all"); }}>
+                <FilterX className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardContent className="p-0">
@@ -120,33 +115,46 @@ export default function TicketsList() {
             </div>
           ) : tickets?.length === 0 ? (
             <div className="text-center p-8 text-muted-foreground">
-              No tickets found matching your criteria.
+              No se encontraron tickets con los filtros seleccionados.
             </div>
           ) : (
             <UITable>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[80px]">ID</TableHead>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Priority</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="w-[70px]">ID</TableHead>
+                  <TableHead>Título</TableHead>
+                  <TableHead>Reportado por</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Prioridad</TableHead>
+                  <TableHead>Categoría</TableHead>
+                  <TableHead>Asignado a</TableHead>
+                  <TableHead>Fecha</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {tickets?.map((ticket) => (
                   <TableRow key={ticket.id}>
                     <TableCell className="font-medium text-muted-foreground">#{ticket.id}</TableCell>
-                    <TableCell className="font-semibold">{ticket.title}</TableCell>
-                    <TableCell>{getStatusBadge(ticket.status)}</TableCell>
-                    <TableCell>{getPriorityBadge(ticket.priority)}</TableCell>
-                    <TableCell className="capitalize">{ticket.category}</TableCell>
-                    <TableCell className="text-muted-foreground">{new Date(ticket.createdAt).toLocaleDateString()}</TableCell>
+                    <TableCell className="font-semibold max-w-[200px] truncate">{ticket.title}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{ticket.createdBy?.name || "—"}</TableCell>
+                    <TableCell>{STATUS_BADGES[ticket.status]}</TableCell>
+                    <TableCell>{PRIORITY_BADGES[ticket.priority]}</TableCell>
+                    <TableCell className="text-sm">{CATEGORY_LABELS[ticket.category] || ticket.category}</TableCell>
+                    <TableCell>
+                      {ticket.assignedTo ? (
+                        <div className="flex items-center gap-1 text-sm">
+                          <UserCheck className="h-3.5 w-3.5 text-green-500" />
+                          {ticket.assignedTo.name}
+                        </div>
+                      ) : (
+                        <span className="text-sm text-muted-foreground italic">Sin asignar</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{new Date(ticket.createdAt).toLocaleDateString("es-MX")}</TableCell>
                     <TableCell className="text-right">
                       <Link href={`/tickets/${ticket.id}`}>
-                        <Button variant="ghost" size="sm">View</Button>
+                        <Button variant="ghost" size="sm">Ver</Button>
                       </Link>
                     </TableCell>
                   </TableRow>

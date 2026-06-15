@@ -257,6 +257,17 @@ export interface RatingInput {
   stars: number;
 }
 
+export interface Attachment {
+  id: number;
+  ticketId: number;
+  uploadedById: number;
+  filename: string;
+  originalName: string;
+  mimetype: string;
+  url: string;
+  createdAt: string;
+}
+
 export type AssetType = typeof AssetType[keyof typeof AssetType];
 
 

@@ -3,24 +3,13 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
-import { 
-  LayoutDashboard, 
-  Ticket, 
-  MonitorSmartphone, 
-  Users, 
-  LogOut, 
-  Menu, 
-  Moon, 
-  Sun,
-  ShieldAlert
+import {
+  LayoutDashboard, Ticket, MonitorSmartphone, Users,
+  LogOut, Menu, Moon, Sun, ShieldAlert,
 } from "lucide-react";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -32,13 +21,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
   if (!user) return <>{children}</>;
 
   const navItems = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["user", "technician", "admin"] },
+    { href: "/dashboard", label: "Panel de Control", icon: LayoutDashboard, roles: ["user", "technician", "admin"] },
     { href: "/tickets", label: "Tickets", icon: Ticket, roles: ["user", "technician", "admin"] },
-    { href: "/assets", label: "Assets", icon: MonitorSmartphone, roles: ["technician", "admin"] },
-    { href: "/users", label: "Users", icon: Users, roles: ["admin"] },
+    { href: "/assets", label: "Inventario", icon: MonitorSmartphone, roles: ["technician", "admin"] },
+    { href: "/users", label: "Usuarios", icon: Users, roles: ["admin"] },
   ];
 
   const filteredNav = navItems.filter((item) => item.roles.includes(user.role));
+
+  const ROLE_LABELS: Record<string, string> = {
+    admin: "Administrador",
+    technician: "Técnico",
+    user: "Usuario",
+  };
 
   const NavLinks = () => (
     <>
@@ -49,7 +44,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <Link key={item.href} href={item.href}>
             <Button
               variant={isActive ? "secondary" : "ghost"}
-              className={`w-full justify-start gap-3 ${isActive ? 'bg-secondary text-secondary-foreground' : 'text-muted-foreground'}`}
+              className={`w-full justify-start gap-3 ${isActive ? "bg-secondary text-secondary-foreground" : "text-muted-foreground"}`}
             >
               <Icon className="h-4 w-4" />
               {item.label}
@@ -62,7 +57,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background md:flex-row">
-      {/* Sidebar for Desktop */}
+      {/* Barra lateral escritorio */}
       <aside className="hidden w-64 flex-col border-r bg-card md:flex">
         <div className="flex h-16 items-center gap-2 border-b px-6">
           <ShieldAlert className="h-6 w-6 text-primary" />
@@ -73,20 +68,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </nav>
         <div className="border-t p-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
               {user.name.charAt(0).toUpperCase()}
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium">{user.name}</span>
-              <span className="text-xs text-muted-foreground capitalize">{user.role}</span>
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-medium truncate">{user.name}</span>
+              <span className="text-xs text-muted-foreground">{ROLE_LABELS[user.role] || user.role}</span>
             </div>
           </div>
         </div>
       </aside>
 
-      {/* Main Content Area */}
+      {/* Contenido principal */}
       <div className="flex flex-1 flex-col">
-        {/* Header */}
         <header className="flex h-16 items-center justify-between border-b bg-card px-4 md:px-6">
           <div className="flex items-center gap-4 md:hidden">
             <Sheet>
@@ -111,27 +105,24 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
 
-          <div className="ml-auto flex items-center gap-4">
+          <div className="ml-auto flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+              aria-label="Cambiar tema"
             >
               {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
             </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full md:hidden">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-semibold">
                     {user.name.charAt(0).toUpperCase()}
                   </div>
+                  <span className="hidden sm:inline">{user.name.split(" ")[0]}</span>
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuTrigger asChild className="hidden md:flex">
-                 <Button variant="outline" size="sm">
-                   Account
-                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel className="font-normal">
@@ -143,14 +134,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logout} className="text-destructive cursor-pointer">
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
+                  <span>Cerrar Sesión</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </header>
 
-        {/* Main Content */}
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           {children}
         </main>

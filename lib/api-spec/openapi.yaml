@@ -23,6 +23,8 @@ tags:
     description: Ticket satisfaction ratings
   - name: stats
     description: Dashboard statistics
+  - name: attachments
+    description: Ticket file attachments
 
 paths:
   /healthz:
@@ -282,6 +284,27 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Rating"
+
+  /tickets/{id}/attachments:
+    get:
+      operationId: getTicketAttachments
+      tags: [attachments]
+      summary: Get attachments for a ticket
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Attachment list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Attachment"
 
   /assets:
     get:
@@ -685,6 +708,28 @@ components:
           type: integer
           minimum: 1
           maximum: 5
+
+    Attachment:
+      type: object
+      required: [id, ticketId, uploadedById, filename, originalName, mimetype, url, createdAt]
+      properties:
+        id:
+          type: integer
+        ticketId:
+          type: integer
+        uploadedById:
+          type: integer
+        filename:
+          type: string
+        originalName:
+          type: string
+        mimetype:
+          type: string
+        url:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
 
     Asset:
       type: object

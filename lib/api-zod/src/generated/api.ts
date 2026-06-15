@@ -306,6 +306,26 @@ export const RateTicketBody = zod.object({
 
 
 /**
+ * @summary Get attachments for a ticket
+ */
+export const GetTicketAttachmentsParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetTicketAttachmentsResponseItem = zod.object({
+  "id": zod.number(),
+  "ticketId": zod.number(),
+  "uploadedById": zod.number(),
+  "filename": zod.string(),
+  "originalName": zod.string(),
+  "mimetype": zod.string(),
+  "url": zod.string(),
+  "createdAt": zod.coerce.date()
+})
+export const GetTicketAttachmentsResponse = zod.array(GetTicketAttachmentsResponseItem)
+
+
+/**
  * @summary List assets
  */
 export const GetAssetsQueryParams = zod.object({

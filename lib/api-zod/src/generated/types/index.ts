@@ -12,6 +12,7 @@ export * from './assetInputType';
 export * from './assetType';
 export * from './assetUpdate';
 export * from './assetUpdateType';
+export * from './attachment';
 export * from './authResponse';
 export * from './comment';
 export * from './commentInput';

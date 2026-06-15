@@ -23,6 +23,7 @@ import type {
   Asset,
   AssetInput,
   AssetUpdate,
+  Attachment,
   AuthResponse,
   Comment,
   CommentInput,
@@ -1020,6 +1021,83 @@ export const useRateTicket = <TError = ErrorType<unknown>,
       > => {
       return useMutation(getRateTicketMutationOptions(options));
     }
+
+export const getGetTicketAttachmentsUrl = (id: number,) => {
+
+
+
+
+  return `/api/tickets/${id}/attachments`
+}
+
+/**
+ * @summary Get attachments for a ticket
+ */
+export const getTicketAttachments = async (id: number, options?: RequestInit): Promise<Attachment[]> => {
+
+  return customFetch<Attachment[]>(getGetTicketAttachmentsUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetTicketAttachmentsQueryKey = (id: number,) => {
+    return [
+    `/api/tickets/${id}/attachments`
+    ] as const;
+    }
+
+
+export const getGetTicketAttachmentsQueryOptions = <TData = Awaited<ReturnType<typeof getTicketAttachments>>, TError = ErrorType<unknown>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTicketAttachments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTicketAttachmentsQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTicketAttachments>>> = ({ signal }) => getTicketAttachments(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTicketAttachments>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetTicketAttachmentsQueryResult = NonNullable<Awaited<ReturnType<typeof getTicketAttachments>>>
+export type GetTicketAttachmentsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get attachments for a ticket
+ */
+
+export function useGetTicketAttachments<TData = Awaited<ReturnType<typeof getTicketAttachments>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTicketAttachments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetTicketAttachmentsQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
 
 export const getGetAssetsUrl = (params?: GetAssetsParams,) => {
   const normalizedParams = new URLSearchParams();
