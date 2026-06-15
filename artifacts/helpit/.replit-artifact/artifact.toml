@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "HelpIT"
+version = "1.0.0"
+id = "artifacts/helpit"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23186
+
+[services.development]
+run = "pnpm --filter @workspace/helpit run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/helpit", "run", "build" ]
+publicDir = "artifacts/helpit/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23186"
+BASE_PATH = "/"

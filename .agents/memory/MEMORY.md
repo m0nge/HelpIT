@@ -1,0 +1,1 @@
+- [HelpIT stack quirks](helpit-stack-quirks.md) — esbuild needs zod in api-server deps; JWT in localStorage via custom-fetch; zod/v4 import breaks esbuild (use zod).

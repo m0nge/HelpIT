@@ -1,0 +1,109 @@
+Quiero construir una aplicación web completa (Full-stack) para una Mesa de Ayuda (Helpdesk) de TI moderna e inteligente llamada "HelpIT". El sistema debe estar enfocado en la automatización de flujos de trabajo, una estética tecnológica impecable y una accesibilidad total.
+
+
+
+---
+
+
+
+### 🛠️ ARQUITECTURA Y TECNOLOGÍAS
+
+*   **Lenguaje y Framework:** TypeScript utilizando una arquitectura full-stack limpia (puedes usar Next.js o una combinación de Express.js para el backend y React con Vite para el frontend).
+
+*   **Base de Datos:** PostgreSQL (utiliza la integración nativa de Replit/Neon). Configura las tablas con relaciones claras: Users ↔ Tickets ↔ Assets (Equipos).
+
+*   **Estilo:** Tailwind CSS para un diseño responsivo y componentes limpios.
+
+
+
+---
+
+
+
+### 🔒 SEGURIDAD COMPLETA
+
+*   **Variables de Entorno:** Toda la información sensible (credenciales de la base de datos, tokens de APIs, llaves de mensajería) DEBE manejarse exclusivamente a través de los "Secrets" de Replit. No escribas contraseñas en texto plano.
+
+*   **Autenticación:** Implementa un sistema seguro basado en JWT (JSON Web Tokens) o sesiones, con contraseñas encriptadas en la base de datos usando bcrypt.
+
+*   **Roles de Usuario:** Define tres roles con permisos estrictos:
+
+    1.  **Usuario Final:** Solo puede crear tickets y calificar soluciones.
+
+    2.  **Técnico:** Puede ver, asignar, comentar y resolver tickets, además de escanear equipos.
+
+    3.  **Administrador:** Control total del inventario, métricas globales y gestión de usuarios.
+
+
+
+---
+
+
+
+### 🎨 INVENTARIO VISUAL (DISEÑO, COLORES Y ACCESIBILIDAD)
+
+La app debe verse sumamente profesional y moderna, manteniendo la accesibilidad (cumplimiento de contraste WCAG) para todos los usuarios. Implementa un "Toggle" en el header para alternar entre dos modos:
+
+
+
+*   **Modo Noche (Predeterminado):** Fondo oscuro profundo (#0B0F19), textos en blanco/gris claro, y acentos tecnológicos en colores vivos pero estéticos (Verde Neón `#10B981` para estados activos/resueltos y Azul Eléctrico `#3B82F6` para botones y enlaces).
+
+*   **Modo Día:** Fondo blanco/gris muy claro (#F9FAFB), textos en gris oscuro metálico (#1F2937), manteniendo los mismos acentos en verde y azul con el contraste ajustado para lectura fácil.
+
+*   **Accesibilidad:** Asegúrate de usar etiquetas HTML semánticas, que todos los botones e inputs tengan estados `:focus` claros para navegación por teclado, y descripciones claras para lectores de pantalla.
+
+
+
+---
+
+
+
+### 🚀 COMPONENTES Y FLUJOS PRINCIPALES
+
+
+
+#### 1. Pantalla de Autenticación (Login / Registro)
+
+*   Formulario limpio con validación de campos. Al iniciar sesión, redirige automáticamente al Dashboard correspondiente según el rol del usuario.
+
+
+
+#### 2. Dashboard Dinámico por Rol
+
+*   **Vista de Usuario:** Lista compacta de sus tickets activos, barra de estado visual (Abierto → En Proceso → Resuelto) y un botón llamativo para "Crear Nuevo Ticket".
+
+*   **Vista de Técnico/Admin:** Métricas rápidas arriba (Tickets pendientes, Tickets críticos de hoy, Tiempo promedio de resolución). Abajo, una tabla interactiva para filtrar tickets por prioridad, estado o categoría.
+
+
+
+#### 3. Formulario de Tickets y Triaje Automático
+
+*   El usuario ingresa Título, Categoría (Hardware, Software, Redes, Accesos) y Descripción.
+
+*   **Lógica de Automatización:** Si la descripción incluye palabras de alta gravedad (ej. "caído", "no enciende", "bloqueado", "error crítico"), el sistema debe cambiar automáticamente la prioridad a **CRÍTICA**.
+
+
+
+#### 4. Hub de Alertas Automatizadas (Backend)
+
+*   **Correos HTML:** Al crear o cerrar un ticket, el sistema debe disparar un correo electrónico formateado en HTML limpio con los detalles estructurados.
+
+*   **Alerta Telegram:** Si un ticket es marcado como CRÍTICO, la app debe disparar un webhook/alerta inmediata hacia un canal de Telegram de soporte técnico usando un bot (configura el token en Secrets).
+
+
+
+#### 5. Gestión de Activos y Escaneo (QR / Código de Barras)
+
+*   Crea una sección de "Inventario" donde cada equipo (PC, Impresora, Servidor) tenga un código único asociado.
+
+*   **Lógica de Escaneo:** Implementa una vista optimizada para móviles que permita usar la cámara del dispositivo para simular el escaneo de un código de barras o QR. Al detectar el código, debe abrir automáticamente el historial técnico de ese dispositivo o vincularlo directamente al ticket actual.
+
+
+
+#### 6. Cierre Automático y Encuesta
+
+*   Cuando el técnico marca el ticket como "Resuelto", se habilita en la vista del usuario un miniformulario con una escala de 5 estrellas para evaluar la satisfacción del servicio.
+
+
+
+Por favor, comienza generando la estructura base del proyecto y las migraciones de la base de datos PostgreSQL.

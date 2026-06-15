@@ -358,6 +358,12 @@ export async function customFetch<T = unknown>(
     }
   }
 
+  // HelpIT JWT Token override
+  const helpitToken = typeof localStorage !== 'undefined' ? localStorage.getItem('helpit_token') : null;
+  if (helpitToken && !headers.has("authorization")) {
+    headers.set("authorization", `Bearer ${helpitToken}`);
+  }
+
   const requestInfo = { method, url: resolveUrl(input) };
 
   const response = await fetch(input, { ...init, method, headers });
