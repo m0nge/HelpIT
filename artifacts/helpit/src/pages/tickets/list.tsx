@@ -29,7 +29,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 export default function TicketsList() {
   const { user } = useAuth();
-  const isTech = user?.role === "technician" || user?.role === "admin";
+  const isUserRole = user?.role === "user";
 
   const [status, setStatus] = useState("all");
   const [priority, setPriority] = useState("all");
@@ -41,7 +41,6 @@ export default function TicketsList() {
   if (category !== "all") queryParams.category = category;
 
   const { data: tickets, isLoading } = useGetTickets(queryParams);
-
   const hasFilters = status !== "all" || priority !== "all" || category !== "all";
 
   return (
@@ -49,23 +48,22 @@ export default function TicketsList() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Tickets</h1>
-          <p className="text-muted-foreground">Gestiona y da seguimiento a las solicitudes de soporte.</p>
+          <p className="text-muted-foreground">
+            {isUserRole ? "Gestiona tus solicitudes de soporte." : "Gestiona y da seguimiento a todos los tickets."}
+          </p>
         </div>
-        <Link href="/tickets/new">
-          <Button className="gap-2">
-            <Plus className="h-4 w-4" />
-            Crear Ticket
-          </Button>
-        </Link>
+        {isUserRole && (
+          <Link href="/tickets/new">
+            <Button className="gap-2"><Plus className="h-4 w-4" />Crear Ticket</Button>
+          </Link>
+        )}
       </div>
 
       <Card>
         <CardHeader className="pb-4">
           <div className="flex flex-wrap gap-3 items-center">
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="Estado" />
-              </SelectTrigger>
+              <SelectTrigger className="w-[160px]"><SelectValue placeholder="Estado" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los estados</SelectItem>
                 <SelectItem value="open">Abierto</SelectItem>
@@ -76,9 +74,7 @@ export default function TicketsList() {
             </Select>
 
             <Select value={priority} onValueChange={setPriority}>
-              <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="Prioridad" />
-              </SelectTrigger>
+              <SelectTrigger className="w-[160px]"><SelectValue placeholder="Prioridad" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas las prioridades</SelectItem>
                 <SelectItem value="low">Baja</SelectItem>
@@ -89,9 +85,7 @@ export default function TicketsList() {
             </Select>
 
             <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="Categoría" />
-              </SelectTrigger>
+              <SelectTrigger className="w-[160px]"><SelectValue placeholder="Categoría" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas las categorías</SelectItem>
                 <SelectItem value="hardware">Hardware</SelectItem>
@@ -110,13 +104,9 @@ export default function TicketsList() {
         </CardHeader>
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="flex justify-center p-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
+            <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
           ) : tickets?.length === 0 ? (
-            <div className="text-center p-8 text-muted-foreground">
-              No se encontraron tickets con los filtros seleccionados.
-            </div>
+            <div className="text-center p-8 text-muted-foreground">No se encontraron tickets.</div>
           ) : (
             <UITable>
               <TableHeader>
@@ -153,9 +143,7 @@ export default function TicketsList() {
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">{new Date(ticket.createdAt).toLocaleDateString("es-MX")}</TableCell>
                     <TableCell className="text-right">
-                      <Link href={`/tickets/${ticket.id}`}>
-                        <Button variant="ghost" size="sm">Ver</Button>
-                      </Link>
+                      <Link href={`/tickets/${ticket.id}`}><Button variant="ghost" size="sm">Ver</Button></Link>
                     </TableCell>
                   </TableRow>
                 ))}

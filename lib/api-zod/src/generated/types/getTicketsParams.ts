@@ -14,4 +14,5 @@ category?: string;
  * @nullable
  */
 assignedTo?: number | null;
+limit?: number;
 };

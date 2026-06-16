@@ -95,8 +95,7 @@ router.get("/stats", requireAuth, async (req, res) => {
 });
 
 router.get("/", requireAuth, async (req, res) => {
-  const { status, priority, category, assignedTo } = req.query;
-  let query = db.select().from(ticketsTable);
+  const { status, priority, category, assignedTo, limit } = req.query;
 
   const conditions = [];
   if (req.user!.role === "user") {
@@ -107,15 +106,20 @@ router.get("/", requireAuth, async (req, res) => {
   if (category) conditions.push(eq(ticketsTable.category, category as any));
   if (assignedTo) conditions.push(eq(ticketsTable.assignedToId, Number(assignedTo)));
 
-  const tickets = conditions.length > 0
-    ? await db.select().from(ticketsTable).where(and(...conditions))
-    : await db.select().from(ticketsTable);
+  let q = db.select().from(ticketsTable).$dynamic();
+  if (conditions.length > 0) q = q.where(and(...conditions));
+  if (limit) q = q.limit(Number(limit));
 
+  const tickets = await q;
   const withRelations = await Promise.all(tickets.map(t => getTicketWithRelations(t.id)));
   res.json(withRelations.filter(Boolean));
 });
 
 router.post("/", requireAuth, async (req, res) => {
+  if (req.user!.role !== "user") {
+    res.status(403).json({ error: "Solo los usuarios pueden crear tickets" });
+    return;
+  }
   const parsed = ticketInputSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid input", details: parsed.error.issues });

@@ -73,7 +73,8 @@ export const GetTicketsQueryParams = zod.object({
   "status": zod.coerce.string().optional(),
   "priority": zod.coerce.string().optional(),
   "category": zod.coerce.string().optional(),
-  "assignedTo": zod.coerce.number().nullish()
+  "assignedTo": zod.coerce.number().nullish(),
+  "limit": zod.coerce.number().optional()
 })
 
 export const GetTicketsResponseItem = zod.object({
@@ -316,6 +317,11 @@ export const GetTicketAttachmentsResponseItem = zod.object({
   "id": zod.number(),
   "ticketId": zod.number(),
   "uploadedById": zod.number(),
+  "uploadedBy": zod.object({
+  "id": zod.number().optional(),
+  "name": zod.string().optional(),
+  "role": zod.string().optional()
+}).nullish(),
   "filename": zod.string(),
   "originalName": zod.string(),
   "mimetype": zod.string(),
@@ -438,6 +444,22 @@ export const GetAssetByCodeResponse = zod.object({
   "notes": zod.string().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date().nullish()
+})
+
+
+/**
+ * @summary Create a user (admin only)
+ */
+export const createUserBodyNameMin = 2;
+
+export const createUserBodyPasswordMin = 6;
+
+
+
+export const CreateUserBody = zod.object({
+  "name": zod.string().min(createUserBodyNameMin),
+  "email": zod.string().email(),
+  "password": zod.string().min(createUserBodyPasswordMin)
 })
 
 

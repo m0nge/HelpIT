@@ -5,11 +5,13 @@
  * HelpIT - IT Helpdesk API
  * OpenAPI spec version: 0.1.0
  */
+import type { AttachmentUploadedBy } from './attachmentUploadedBy';
 
 export interface Attachment {
   id: number;
   ticketId: number;
   uploadedById: number;
+  uploadedBy?: AttachmentUploadedBy;
   filename: string;
   originalName: string;
   mimetype: string;

@@ -257,10 +257,17 @@ export interface RatingInput {
   stars: number;
 }
 
+export type AttachmentUploadedBy = {
+  id?: number;
+  name?: string;
+  role?: string;
+} | null;
+
 export interface Attachment {
   id: number;
   ticketId: number;
   uploadedById: number;
+  uploadedBy?: AttachmentUploadedBy;
   filename: string;
   originalName: string;
   mimetype: string;
@@ -347,6 +354,7 @@ category?: string;
  * @nullable
  */
 assignedTo?: number | null;
+limit?: number;
 };
 
 export type GetAssetsParams = {

@@ -119,6 +119,10 @@ paths:
           in: query
           schema:
             type: ["integer", "null"]
+        - name: limit
+          in: query
+          schema:
+            type: integer
       responses:
         "200":
           description: Ticket list
@@ -422,6 +426,25 @@ paths:
           description: Not found
 
   /users:
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Create a user (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Validation error
     get:
       operationId: getUsers
       tags: [users]
@@ -719,6 +742,13 @@ components:
           type: integer
         uploadedById:
           type: integer
+        uploadedBy:
+          type: object
+          nullable: true
+          properties:
+            id: { type: integer }
+            name: { type: string }
+            role: { type: string }
         filename:
           type: string
         originalName:
